@@ -1,34 +1,51 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
-    cloud_name: 'djgwb5qgp',
-    api_key: '699228672583447',
-    api_secret: 'Ptn-QHrc3iDzYtzA6q5_mpcPrts'
+  cloud_name: "dxrdazkwf",
+  api_key: "571651534448262",
+  api_secret: "qUtgH8GlBGaDFjgeGFhUFpw9ajs",
 });
 
 async function uploadToCloudinary(buffer) {
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'image', folder: 'images' },
-            (error, result) => {
-                if (error) return reject(error);
-                resolve(result);
-            }
-        );
+  return new Promise((resolve, reject) => {
+    let options = { resource_type: "image", folder: "images" }; // mặc định ảnh
 
-        stream.end(buffer);
-    });
+    // Kiểm tra PDF theo magic number (%PDF)
+    const header = buffer.toString("utf8", 0, 4);
+    if (header === "%PDF") {
+      options = {
+        resource_type: "raw",
+        folder: "pdfs",
+        format: "pdf",
+        access_mode: "public",
+      };
+    }
+
+    const stream = cloudinary.uploader.upload_stream(
+      options,
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    stream.end(buffer);
+  });
 }
 
 async function deleteImageFromCloudinary(publicId) {
-    return new Promise((resolve, reject) => {
-        cloudinary.uploader.destroy(publicId, { resource_type: 'image' }, (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-        });
-    });
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.destroy(
+      publicId,
+      { resource_type: "image" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+  });
 }
 module.exports = {
-    uploadToCloudinary,
-    deleteImageFromCloudinary,
+  uploadToCloudinary,
+  deleteImageFromCloudinary,
 };
